@@ -39,6 +39,7 @@ class Header extends React.Component {
             <Typography component="p">
               EXCLUSIVO - SCANIA
             </Typography>
+            <img src={logo} alt="logo"/>
           </Toolbar>
         </AppBar>
       </div>
