@@ -1,4 +1,16 @@
 .main-container {
-    background: #000;
+    background: #041E42;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 0 auto;
+    margin-top: 2%;
+}
+
+.paper {
+    display: flex;
+    width: 92%;
+    margin: 0;
+    flex-wrap: wrap;
 }
 

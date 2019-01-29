@@ -14,9 +14,14 @@ import FormGroup from '@material-ui/core/FormGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 
+// TODO: Nome na direita
+// TODO: Copyright + ano inicial + ano final
+
+
 const styles = {
   root: {
     flexGrow: 1,
+    display: 'flex'
   },
   grow: {
     flexGrow: 1,
@@ -31,9 +36,11 @@ class Header extends React.Component {
 
     return (
       <div className={classes.root}>
-        <AppBar position="static">
+        <AppBar style={{background: '#041E42'}} position="static">
           <Toolbar>
-            <h1 style={{fontWeight: 'bold'}}>SCANIA</h1>          
+            <div>
+              <h1 style={{fontFamily:'Scania Sans Headline Bold'}}>SCANIA</h1>          
+            </div>
           </Toolbar>
         </AppBar>
       </div>

@@ -17,9 +17,24 @@ import Menu from '@material-ui/core/Menu';
 const styles = {
   root: {
     flexGrow: 1,
+    flexWrap: 'wrap'
+  },
+  header: {
+    display: 'flex',
+    width: '90%'
   },
   grow: {
     flexGrow: 1,
+  },
+  title: {
+    width: '90%',
+    fontSize: '3vh'
+  },
+  logoBox: {
+    width: '7.5vh'
+  },
+  logo: {
+    width: '100%'
   }
 };
 
@@ -31,15 +46,22 @@ class Header extends React.Component {
 
     return (
       <div className={classes.root}>
-        <AppBar position="static">
+        <AppBar style={{background: '#041E42'}} position="static">
           <Toolbar>
-            <Typography component="p">
+            <div className={classes.header}>
+              <div className={classes.title}>PLANO TNES - REDE CREDENCIADA </div>
+              <div className={classes.subTitle}>EXCLUSIVO SCANIA</div>
+            </div>
+            <div className={classes.logoBox}>
+              <img className={classes.logo} src={logo} alt="logo"/>   
+            </div>
+            {/* <Typography component="p">
               REDE CREDENCIADA PLANO TNES
             </Typography>
             <Typography component="p">
               EXCLUSIVO - SCANIA
             </Typography>
-            <img src={logo} alt="logo"/>
+            <img className={classes.logo} src={logo} alt="logo"/> */}
           </Toolbar>
         </AppBar>
       </div>

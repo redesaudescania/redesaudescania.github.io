@@ -9,18 +9,16 @@ import Typography from '@material-ui/core/Typography';
 
 const styles = {
   card: {
-    minWidth: 275,
-  },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
-  },
+    minWidth: 300,
+    margin: 'auto',
+    marginTop: '1%',
+    marginBottom: '1%'
+  },  
   title: {
     fontSize: 14,
   },
   pos: {
-    marginBottom: 12,
+    marginBottom: 4,
   },
 };
 
@@ -32,27 +30,29 @@ function SimpleCard(props) {
     <Card className={classes.card}>
       <CardContent>
         <Typography className={classes.title} color="textSecondary" gutterBottom>
-          Word of the Day
+          CIDADE - ESTADO
         </Typography>
+
         <Typography variant="h5" component="h2">
-          be
-          {bull}
-          nev
-          {bull}o{bull}
-          lent
+        NOME DO HOSPITAL
         </Typography>
-        <Typography className={classes.pos} color="textSecondary">
-          adjective
+
+        <Typography className={classes.pos} color="textSecondary">    
+          Endereço: Rua José Odorizzi, 151, Vila Euro   
         </Typography>
+        <Typography className={classes.pos} color="textSecondary">    
+          Tel 1: (011) 1111 - 2222
+        </Typography>
+        <Typography className={classes.pos} color="textSecondary">    
+          Tel 2: (011) 1111 - 2222
+        </Typography>
+        
         <Typography component="p">
-          well meaning and kindly.
-          <br />
-          {'"a benevolent smile"'}
+          Referencia  
         </Typography>
+
       </CardContent>
-      <CardActions>
-        <Button size="small">Learn More</Button>
-      </CardActions>
+      
     </Card>
   );
 }

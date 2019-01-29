@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Paper } from '@material-ui/core';
 
+import Clinic from '../../components/Clinic/Clinic';
+
 import './MainContainer.css';
 
 // Enquanto nao carrega exibir o Spinner
@@ -12,20 +14,16 @@ import './MainContainer.css';
 
 export default class MainContainer extends Component {
 
-
-
-
     render() {
         return (
             <div className="main-container">
-            
-                <Paper>
-                    ESCOLHA O TIPO DE PESQUISA
-                    * POR CIDADE
-                    * POR ESPECIALIDADE
-                    * POR CLINICA / HOSPITAL                    
+
+                <Paper className='paper'>
+                    <Clinic />
+                    <Clinic />
+                    <Clinic />                    
                 </Paper>
-                
+
             </div>
         )
     }
