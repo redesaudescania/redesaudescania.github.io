@@ -9,7 +9,7 @@ import Typography from '@material-ui/core/Typography';
 
 const styles = {
   card: {
-    minWidth: 300,
+    minWidth: '12vh',
     margin: 'auto',
     marginTop: '1.2%',
     marginBottom: '1.2%'
@@ -42,11 +42,15 @@ function Clinic(props) {
         </Typography>
 
         <Typography className={classes.pos} color="textSecondary">
-          Tel 1: <a href={clinic['TEL1-REF']}> {clinic['TEL1-REF']} </a>
+          Tel 1: <a href={"tel:"+(+clinic['TEL1-REF'])}> {+clinic['TEL1-REF']} </a>
         </Typography>
 
         <Typography className={classes.pos} color="textSecondary">
-          Tel 2: <a href={clinic['TEL2-REF']}> {clinic['TEL2-REF']} </a>
+        {
+          (+clinic['TEL2-REF']) > 0 &&
+          <span>Tel 2: <a href={"tel:"+(+clinic['TEL2-REF'])}> {+clinic['TEL2-REF']} </a> </span>
+        }
+          
         </Typography>
 
         <Typography component="p">

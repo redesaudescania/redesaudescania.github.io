@@ -2,14 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 
-/*
-import Input from '@material-ui/core/Input';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
-import FilledInput from '@material-ui/core/FilledInput';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-*/
-
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
@@ -22,14 +14,29 @@ const styles = theme => ({
   root: {
     display: 'flex',
     flexWrap: 'wrap',
+    width: '100%'
   },
   formControl: {
     margin: theme.spacing.unit,
     minWidth: 120,
+    width: '100%',
+    marginTop: '5%'
   },
   selectEmpty: {
     marginTop: theme.spacing.unit * 2,
   },
+  selectUf: {
+    fontSize: '1.2rem',
+    display: 'flex',
+    width: '100%'
+  },
+  searchButton: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',    
+    marginTop: '10%',
+    marginBottom: '2.5%'
+  }
 });
 
 
@@ -44,7 +51,7 @@ class FilterContainer extends React.Component {
     selectedCity: "",
     specialities: [],
     selectedSpeciality: "",
-    enabled: false
+    enabled: true
   }
 
   componentDidMount() {
@@ -55,7 +62,27 @@ class FilterContainer extends React.Component {
       ufs.splice(idx, 1);
       ufs.unshift({ "sigla": "SP", "nome": "SÃO PAULO" })
       this.setState({ ufs })
-      // this.setState({selectedUf: ufs[0].sigla})
+      const selectedUf = ufs[0].sigla;
+      this.setState({ selectedUf });
+      this._getCities(selectedUf);      
+    });
+  }
+
+  _getCities(uf) {
+    this._api.getCities(uf).then(cities => {
+      const orderedCities = this._reorderCities(cities, uf);
+      this.setState({ cities: orderedCities });    
+      const selectedCity = cities[0];
+      this.setState({selectedCity})
+      this._getSpecialities(uf, selectedCity)
+    });
+  }
+
+  _getSpecialities(selectedUf, selectedCity) {
+    this._api.getSpecialities(selectedUf, selectedCity).then(specialities => {
+      specialities = specialities.sort((a, b) => a.localeCompare(b));
+      this.setState({ specialities });
+      this.setState({ selectedSpeciality: specialities[0] })
     });
   }
 
@@ -74,6 +101,7 @@ class FilterContainer extends React.Component {
     const selectedCity = e.target.value;
     this.setState({ selectedCity });
     this._api.getSpecialities(selectedUf, selectedCity).then(specialities => {
+      specialities = specialities.sort((a, b) => a.localeCompare(b));
       this.setState({ specialities });
       this.setState({ selectedSpeciality: specialities[0] })
     });
@@ -100,15 +128,16 @@ class FilterContainer extends React.Component {
   }
 
   _reorderCities(cities, selectedUf) {
+    cities = cities.sort((a, b) => a.localeCompare(b))
     if (selectedUf !== 'SP') {
       return cities;
     }
-    const citiesArray = [    
-      'SAO PAULO','RIBEIRAO PIRES','MAUA',
-      'DIADEMA','SAO CAETANO DO SUL','SANTO ANDRE','SAO BERNARDO DO CAMPO'
+    const citiesArray = [
+      'SAO PAULO', 'RIBEIRAO PIRES', 'MAUA',
+      'DIADEMA', 'SAO CAETANO DO SUL', 'SANTO ANDRE', 'SAO BERNARDO DO CAMPO'
     ];
 
-    citiesArray.map((ca,i) => {
+    citiesArray.map((ca, i) => {
       let idx = cities.map(c => c).indexOf(ca);
       cities.splice(idx, 1);
       cities.unshift(ca);
@@ -120,13 +149,14 @@ class FilterContainer extends React.Component {
     const { classes } = this.props;
     const { ufs, cities, specialities } = this.state;
     return (
-      <React.Fragment>
+      <div className={classes.root}>
 
-        <FormControl>
+        <FormControl className={classes.formControl}>
           <NativeSelect
             value={this.state.selectedUf}
             name="uf"
             onChange={this.handleSelectUF}
+            className={classes.selectUf}
           >
             {
               ufs.map((u, i) => (<option key={i} value={u.sigla}>{u.sigla} - {u.nome}</option>))
@@ -136,13 +166,12 @@ class FilterContainer extends React.Component {
           <FormHelperText>Selecione um estado</FormHelperText>
         </FormControl>
 
-        <FormControl>
+        <FormControl className={classes.formControl}>
           <NativeSelect
             value={this.state.selectedCity}
             name="city"
-            onChange={this.handleSelectCity}
-          >
-            <option disabled>SELECIONE</option>
+            onChange={this.handleSelectCity}            
+          >            
             {
               cities.map((c, i) => (<option key={i} value={c}>{c}</option>))
             }
@@ -151,13 +180,13 @@ class FilterContainer extends React.Component {
           <FormHelperText>Selecione uma cidade</FormHelperText>
         </FormControl>
 
-        <FormControl>
+        <FormControl className={classes.formControl}>
           <NativeSelect
             value={this.state.selectedSpeciality}
             name="speciality"
             onChange={this.handleSelectSpeciality}
           >
-            <option disabled>SELECIONE</option>
+            {/* <option selected>SELECIONE</option> */}
             {
               specialities.map((s, i) => (<option key={i} value={s}>{s}</option>))
             }
@@ -166,11 +195,11 @@ class FilterContainer extends React.Component {
           <FormHelperText>Selecione uma Especialidade</FormHelperText>
         </FormControl>
 
-        <div>
-          {this.state.enabled && <Button onClick={this.handleResults}>BUSCAR</Button>}
+        <div className={classes.searchButton}>
+          {this.state.enabled && <Button size="medium" variant="contained" color="primary" onClick={this.handleResults}>BUSCAR</Button>}
         </div>
 
-      </React.Fragment>
+      </div>
     )
   }
 }
