@@ -12,12 +12,12 @@ class RedeScaniaApi {
 
 
     getUF() {
-        const q = { distinct: "rede", key: "UF" };
-        return axios.post(this.url, q).then(res => res.data.values);
+        let url = "https://api.mlab.com/api/1/databases/redescania/collections/uf?"
+        url += `apiKey=${this._apikey}&s={"sigla":1}`;
+        return axios.get(url).then(res => res.data);
     }
 
-    getCities(uf) {
-        // e.g {"distinct": "rede","key": "CIDADE","query": {"UF":"SP"}} 
+    getCities(uf) {        
         const q = { distinct: "rede", key: "CIDADE", query: { "UF": uf } };
         return axios.post(this.url, q).then(res => res.data.values);
     }
@@ -40,8 +40,7 @@ class RedeScaniaApi {
         url += "apiKey=" + this._apikey;
         url += `&q={ "UF":  "${params[0]}" ,`
         url += `"CIDADE":  "${params[1]}" ,`
-        url += ` "ESPECIALIDADE":  "${params[2]}" }`
-        console.log(url)
+        url += ` "ESPECIALIDADE":  "${params[2]}" }`        
         return axios.get(url).then(res => res.data);
 
     }

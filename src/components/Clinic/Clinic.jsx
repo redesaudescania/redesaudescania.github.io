@@ -2,18 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
+
 import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
+
 import Typography from '@material-ui/core/Typography';
 
 const styles = {
   card: {
     minWidth: 300,
     margin: 'auto',
-    marginTop: '1%',
-    marginBottom: '1%'
-  },  
+    marginTop: '1.2%',
+    marginBottom: '1.2%'
+  },
   title: {
     fontSize: 14,
   },
@@ -22,43 +22,45 @@ const styles = {
   },
 };
 
-function SimpleCard(props) {
+function Clinic(props) {
   const { classes } = props;
-  const bull = <span className={classes.bullet}>•</span>;
+  const { clinic } = props;
 
   return (
     <Card className={classes.card}>
       <CardContent>
         <Typography className={classes.title} color="textSecondary" gutterBottom>
-          CIDADE - ESTADO
+          {clinic.CIDADE} - {clinic.UF}
         </Typography>
 
-        <Typography variant="h5" component="h2">
-        NOME DO HOSPITAL
+        <Typography variant="h5" component="h5">
+          {clinic['NOME-REF']}
         </Typography>
 
-        <Typography className={classes.pos} color="textSecondary">    
-          Endereço: Rua José Odorizzi, 151, Vila Euro   
+        <Typography className={classes.pos} color="textSecondary">
+          Endereço: {clinic['RUA-REF']}, {+clinic.NUM}, {clinic['BAIRRO-REF']}
         </Typography>
-        <Typography className={classes.pos} color="textSecondary">    
-          Tel 1: (011) 1111 - 2222
+
+        <Typography className={classes.pos} color="textSecondary">
+          Tel 1: <a href={clinic['TEL1-REF']}> {clinic['TEL1-REF']} </a>
         </Typography>
-        <Typography className={classes.pos} color="textSecondary">    
-          Tel 2: (011) 1111 - 2222
+
+        <Typography className={classes.pos} color="textSecondary">
+          Tel 2: <a href={clinic['TEL2-REF']}> {clinic['TEL2-REF']} </a>
         </Typography>
-        
+
         <Typography component="p">
-          Referencia  
+          Referência: {clinic['TIPO-REF']}
         </Typography>
 
       </CardContent>
-      
+
     </Card>
   );
 }
 
-SimpleCard.propTypes = {
+Clinic.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(SimpleCard);
+export default withStyles(styles)(Clinic);

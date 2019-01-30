@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import logo from '../../logo.svg';
 
+
+/*
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -13,9 +14,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
+*/
 
-// TODO: Nome na direita
-// TODO: Copyright + ano inicial + ano final
 
 
 const styles = {
@@ -25,6 +25,13 @@ const styles = {
   },
   grow: {
     flexGrow: 1,
+  },
+  footer: {
+    display: 'flex',
+    fontSize: '2.5vh',    
+    width: '100%',
+    margin: 'auto',    
+    justifyContent: 'flex-end'
   }
 };
 
@@ -38,7 +45,7 @@ class Header extends React.Component {
       <div className={classes.root}>
         <AppBar style={{background: '#041E42'}} position="static">
           <Toolbar>
-            <div>
+            <div className={classes.footer}>
               <h1 style={{fontFamily:'Scania Sans Headline Bold'}}>SCANIA</h1>          
             </div>
           </Toolbar>
