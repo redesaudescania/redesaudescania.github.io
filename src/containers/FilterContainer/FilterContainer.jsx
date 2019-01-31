@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-
+import CircularProgress from '@material-ui/core/CircularProgress';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
+
 import Button from '@material-ui/core/Button';
 import NativeSelect from '@material-ui/core/NativeSelect';
 
@@ -16,8 +16,7 @@ const styles = theme => ({
     flexWrap: 'wrap',
     width: '100%'
   },
-  formControl: {
-    margin: theme.spacing.unit,
+  formControl: {    
     minWidth: 120,
     width: '75%',
     margin: 'auto',
@@ -34,9 +33,37 @@ const styles = theme => ({
   searchButton: {
     width: '100%',
     display: 'flex',
-    justifyContent: 'center',    
+    justifyContent: 'center',
     marginTop: '10%',
     marginBottom: '2.5%'
+  },
+  hidden: {
+    display: 'none'
+  },
+  progress: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '52.5vh',
+    width: '100%'
+  },
+  error: {
+    display: 'flex',   
+    margin: 'auto',
+    width: '70%',    
+    flexWrap: 'wrap'
+  },
+  errorTitle: {    
+    textAlign: 'center',
+    width: '100%',    
+  }, 
+  reloadButton: {
+    textAlign: 'center',
+    border: '1px solid red',
+    margin: 'auto',
+    display: 'flex',
+    marginTop: '2%',     
+    marginBottom: '2%'    
   }
 });
 
@@ -52,29 +79,33 @@ class FilterContainer extends React.Component {
     selectedCity: "",
     specialities: [],
     selectedSpeciality: "",
-    enabled: true
+    enabled: true,
+    error: false,
+    loading: true,
+    reloadTime: 0
   }
 
   componentDidMount() {
-    // Buscar os Estados, mas colocar os do SUL primeiro
     this._api.getUF().then(ufs => {
-      // TODO: Ordenar o array fora desta função          
       const idx = ufs.map(u => u.sigla).indexOf('SP')
       ufs.splice(idx, 1);
       ufs.unshift({ "sigla": "SP", "nome": "SÃO PAULO" })
       this.setState({ ufs })
       const selectedUf = ufs[0].sigla;
       this.setState({ selectedUf });
-      this._getCities(selectedUf);      
-    });
+      this._getCities(selectedUf);
+    })
+      .catch(() => {
+        this.setState({ error: true })
+      });
   }
 
   _getCities(uf) {
     this._api.getCities(uf).then(cities => {
       const orderedCities = this._reorderCities(cities, uf);
-      this.setState({ cities: orderedCities });    
+      this.setState({ cities: orderedCities });
       const selectedCity = cities[0];
-      this.setState({selectedCity})
+      this.setState({ selectedCity })
       this._getSpecialities(uf, selectedCity)
     });
   }
@@ -84,6 +115,7 @@ class FilterContainer extends React.Component {
       specialities = specialities.sort((a, b) => a.localeCompare(b));
       this.setState({ specialities });
       this.setState({ selectedSpeciality: specialities[0] })
+      this.setState({ loading: false })
     });
   }
 
@@ -111,17 +143,14 @@ class FilterContainer extends React.Component {
   handleSelectSpeciality = (e) => {
     this.setState({ enabled: true });
     const selectedSpeciality = e.target.value;
-    this.setState({ selectedSpeciality })
-    console.log(selectedSpeciality)
-    // Habilita o botao de pesquisar
-    // Passa resultados para o main container
-    // Muda o componente para o results
+    this.setState({ selectedSpeciality })    
   }
 
   handleResults = () => {
     const { selectedUf, selectedCity, selectedSpeciality } = this.state;
+    this.setState({loading: true})
     this.props.handleResults('results');
-    this._api.getByParameters(selectedUf, selectedCity, selectedSpeciality).then(r => {      
+    this._api.getByParameters(selectedUf, selectedCity, selectedSpeciality).then(r => {
       this.props.handleResults(r, selectedSpeciality);
     })
   }
@@ -146,10 +175,10 @@ class FilterContainer extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { ufs, cities, specialities } = this.state;
-    return (
-      <div className={classes.root}>
+    const { ufs, cities, specialities, loading, error } = this.state;
 
+    const content = (
+      <React.Fragment>
         <FormControl className={classes.formControl}>
           <NativeSelect
             value={this.state.selectedUf}
@@ -169,8 +198,8 @@ class FilterContainer extends React.Component {
           <NativeSelect
             value={this.state.selectedCity}
             name="city"
-            onChange={this.handleSelectCity}            
-          >            
+            onChange={this.handleSelectCity}
+          >
             {
               cities.map((c, i) => (<option key={i} value={c}>{c}</option>))
             }
@@ -197,6 +226,37 @@ class FilterContainer extends React.Component {
         <div className={classes.searchButton}>
           {this.state.enabled && <Button size="medium" variant="contained" color="primary" onClick={this.handleResults}>BUSCAR</Button>}
         </div>
+      </React.Fragment>
+    )
+
+    return (
+      <div className={classes.root}>
+
+
+
+        {
+          loading ?
+            (
+              <div className={classes.progress}>
+                <CircularProgress thickness={5} size={100} />
+              </div>
+            ) :
+            content
+        }
+        {
+          error &&
+          <div className={classes.error}>
+            <div className={classes.errorTitle}>
+              ERRO: VERIFIQUE SUA CONEXÃO COM A INTERNET E TENTE NOVAMENTE
+            </div>
+            <div onClick={() => window.location.reload()} className={classes.reloadButton}>
+              <Button variant="contained" color="secondary">RECARREGAR</Button>
+            </div>
+          </div>
+        }
+
+
+
 
       </div>
     )
