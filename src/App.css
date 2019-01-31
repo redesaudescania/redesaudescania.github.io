@@ -4,4 +4,6 @@ body, html {
 
 .app-container {
     background: #041E42;
+    min-height: 100vh;
+    
 }

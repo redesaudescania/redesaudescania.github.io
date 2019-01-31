@@ -9,16 +9,23 @@ import Typography from '@material-ui/core/Typography';
 
 const styles = {
   card: {
-    minWidth: '12vh',
+    minWidth: '100%',
+    maxWidth: '100%',    
     margin: 'auto',
     marginTop: '1.2%',
+    marginLeft: '5%%',
+    marginRight: '5%%',
     marginBottom: '1.2%'
   },
   title: {
     fontSize: 14,
   },
+  nomeRef: {
+    fontFamily: 'Scania Sans Headline'
+  },
   pos: {
     marginBottom: 4,
+    fontFamily: 'Scania Sans Condensed'
   },
 };
 
@@ -33,7 +40,7 @@ function Clinic(props) {
           {clinic.CIDADE} - {clinic.UF}
         </Typography>
 
-        <Typography variant="h5" component="h5">
+        <Typography variant="h5" component="h5" className={classes.nomeRef} >
           {clinic['NOME-REF']}
         </Typography>
 

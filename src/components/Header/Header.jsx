@@ -44,7 +44,8 @@ const styles = {
   },
   logo: {
     width: '100%',
-    maxWidth: '80px'
+    maxWidth: '75px',
+    marginTop: '5%'
   }
 };
 

@@ -20,8 +20,9 @@ export default class MainContainer extends Component {
         resultTitle: ''
     }
 
-    handleResults = (results) => {
+    handleResults = (results, resultTitle) => {
         this.setState({results});
+        this.setState({resultTitle});
         this.setState({ page: 'results' });
     }
 

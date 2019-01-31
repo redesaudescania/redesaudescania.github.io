@@ -19,8 +19,9 @@ const styles = theme => ({
   formControl: {
     margin: theme.spacing.unit,
     minWidth: 120,
-    width: '100%',
-    marginTop: '5%'
+    width: '75%',
+    margin: 'auto',
+    marginTop: '7.5%'
   },
   selectEmpty: {
     marginTop: theme.spacing.unit * 2,
@@ -120,10 +121,8 @@ class FilterContainer extends React.Component {
   handleResults = () => {
     const { selectedUf, selectedCity, selectedSpeciality } = this.state;
     this.props.handleResults('results');
-    this._api.getByParameters(selectedUf, selectedCity, selectedSpeciality).then(r => {
-      console.log(r)
-      this.props.handleResults(r);
-
+    this._api.getByParameters(selectedUf, selectedCity, selectedSpeciality).then(r => {      
+      this.props.handleResults(r, selectedSpeciality);
     })
   }
 

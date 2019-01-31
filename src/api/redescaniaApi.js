@@ -40,7 +40,8 @@ class RedeScaniaApi {
         url += "apiKey=" + this._apikey;
         url += `&q={ "UF":  "${params[0]}" ,`
         url += `"CIDADE":  "${params[1]}" ,`
-        url += ` "ESPECIALIDADE":  "${params[2]}" }`        
+        url += ` "ESPECIALIDADE":  "${params[2]}" }`      
+        url += `&s={"NOME-REF": 1} `  
         return axios.get(url).then(res => res.data);
 
     }

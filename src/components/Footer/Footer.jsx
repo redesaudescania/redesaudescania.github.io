@@ -20,22 +20,32 @@ import Menu from '@material-ui/core/Menu';
 
 const styles = {
   root: {
-    flexGrow: 1,
-    display: 'flex'
-  },
-  grow: {
-    flexGrow: 1,
+    flexGrow: 1,    
+    display: 'flex',
+    borderTop: '0.3rem solid white',
+    marginTop: '12.5vh',
+    bottom: 0,
+    width: '100%',
+    
   },
   footer: {
     display: 'flex',
-    fontSize: '2.5vh',    
+    fontSize: '2.5vh',
     width: '100%',
-    margin: 'auto',    
+    margin: 'auto',
     justifyContent: 'flex-end'
+  },
+  logo: {
+    fontFamily: 'Scania Sans Headline Bold'
   }
 };
 
-class Header extends React.Component {
+class Footer extends React.Component {
+
+  componentDidMount() {
+    const height = document.body.scrollHeight;
+    this.setState({ height });
+  }
 
   render() {
 
@@ -43,10 +53,10 @@ class Header extends React.Component {
 
     return (
       <div className={classes.root}>
-        <AppBar style={{background: '#041E42'}} position="static">
+        <AppBar style={{ background: '#041E42' }} position="static">
           <Toolbar>
-            <div className={classes.footer}>
-              <h1 style={{fontFamily:'Scania Sans Headline Bold'}}>SCANIA</h1>          
+            <div className={classes.footer}>              
+              <h1 className={classes.logo}>SCANIA</h1>
             </div>
           </Toolbar>
         </AppBar>
@@ -55,8 +65,8 @@ class Header extends React.Component {
   }
 }
 
-Header.propTypes = {
+Footer.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Header);
+export default withStyles(styles)(Footer);
