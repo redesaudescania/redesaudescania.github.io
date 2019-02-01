@@ -2,18 +2,18 @@ import axios from 'axios';
 
 class RedeScaniaApi {
 
-    _apikey = "RaMXCGwuJgzDb0wApqf8szcbN36SncAL";
+    _ = "eEAoxsfgqNaApqb2hGnHblc8RgWsIHzD";
     _api = "https://api.mlab.com/api/1/databases/redescania/runCommand";
 
 
     constructor() {
-        this.url = this._api + '?apiKey=' + this._apikey;
+        this.url = this._api + '?apiKey=' + this._;
     }
 
 
     getUF() {
         let url = "https://api.mlab.com/api/1/databases/redescania/collections/uf?"
-        url += `apiKey=${this._apikey}&s={"sigla":1}`;
+        url += `apiKey=${this._}&s={"sigla":1}`;
         return axios.get(url).then(res => res.data);
     }
 
@@ -37,7 +37,7 @@ class RedeScaniaApi {
     getByParameters(...params) {
         
         let url = "https://api.mlab.com/api/1/databases/redescania/collections/rede?"
-        url += "apiKey=" + this._apikey;
+        url += "apiKey=" + this._;
         url += `&q={ "UF":  "${params[0]}" ,`
         url += `"CIDADE":  "${params[1]}" ,`
         url += ` "ESPECIALIDADE":  "${params[2]}" }`      
