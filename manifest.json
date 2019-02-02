@@ -1,5 +1,5 @@
 {
-  "short_name": "SCANIA - TNES",
+  "short_name": "SCANIA-TNES",
   "name": "Rede Scania TNES",
   "icons": [
     {
@@ -42,5 +42,5 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#041E42",
-  "background_color": "#FAFAFA"
+  "background_color": "#041E42"
 }
