@@ -161,7 +161,7 @@ class FilterContainer extends React.Component {
       return cities;
     }
     const citiesArray = [
-      'SAO PAULO', 'RIBEIRAO PIRES', 'MAUA',
+      'SAO PAULO', 'SANTOS', 'RIBEIRAO PIRES', 'MAUA',
       'DIADEMA', 'SAO CAETANO DO SUL', 'SANTO ANDRE', 'SAO BERNARDO DO CAMPO'
     ];
 
@@ -169,6 +169,7 @@ class FilterContainer extends React.Component {
       let idx = cities.map(c => c).indexOf(ca);
       cities.splice(idx, 1);
       cities.unshift(ca);
+      return ca;
     });
     return cities;
   }

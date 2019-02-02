@@ -2,7 +2,7 @@ import axios from 'axios';
 
 class RedeScaniaApi {
 
-    _ = "eEAoxsfgqNaApqb2hGnHblc8RgWsIHzD";
+    
     _api = "https://api.mlab.com/api/1/databases/redescania/runCommand";
 
 
@@ -47,6 +47,7 @@ class RedeScaniaApi {
     }
 
 
+    _ = process.env.REACT_APP_APIKEY;
 
 }
 
