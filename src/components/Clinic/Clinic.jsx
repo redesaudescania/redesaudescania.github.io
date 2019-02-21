@@ -27,6 +27,10 @@ const styles = {
     marginBottom: 4,
     fontFamily: 'Scania Sans Condensed'
   },
+  speciality: {
+    fontSize: '1rem',
+    color: '#890202'
+  }
 };
 
 function Clinic(props) {
@@ -63,6 +67,9 @@ function Clinic(props) {
         <Typography component="p">
           Referência: {clinic['TIPO-REF']}
         </Typography>
+        <Typography component="p" className={classes.speciality}>
+          Especialidade: {clinic['ESPECIALIDADE']}
+        </Typography>        
 
       </CardContent>
 

@@ -79,27 +79,27 @@ class FilterContainer extends React.Component {
     cities: [],
     specialities: [],
     hospitals: [],
-    selectedUf: "",
-    selectedCity: "",
+    selectedUf: localStorage.getItem('selectedUf'),
+    selectedCity: localStorage.getItem('selectedCity'),
     selectedSpeciality: "",
-    selectedHospital: "",
-    filterType: 'speciality',
+    selectedHospital: localStorage.getItem('selectedHospital'),
+    filterType: localStorage.getItem('filterType'),
     enabled: true,
     error: false,
     loading: true,
     reloadTime: 0
   }
 
-  componentDidMount() {
-
+  componentDidMount() {    
+    // TODO: Get user's last choices
     this._api.getUF().then(ufs => {
       const idx = ufs.map(u => u.sigla).indexOf('SP')
       ufs.splice(idx, 1);
       ufs.unshift({ "sigla": "SP", "nome": "SÃO PAULO" })
       this.setState({ ufs })
-      const selectedUf = ufs[0].sigla;
-      this.setState({ selectedUf });
-      this._getCities(selectedUf);
+      // const selectedUf = ufs[0].sigla;
+      // this.setState({ selectedUf });
+      this._getCities(this.state.selectedUf);
     })
       .catch(() => {
         this.setState({ error: true })
@@ -110,8 +110,8 @@ class FilterContainer extends React.Component {
     this._api.getCities(uf).then(cities => {
       const orderedCities = this._reorderCities(cities, uf);
       this.setState({ cities: orderedCities });
-      const selectedCity = cities[0];
-      this.setState({ selectedCity });
+       const selectedCity = this.state.selectedCity;
+      //this.setState({ selectedCity });
       this._getSpecialities(uf, selectedCity);
       this._getHospitals(uf, selectedCity);
     });
@@ -135,16 +135,23 @@ class FilterContainer extends React.Component {
     });
   }
 
+  // _getLocationStorage() {
+  //   const filterType = localStorage.getItem('filterType');
+  //   const selectedUf
+  // }
+
   handleFilterType = (e) => {
     const filterType = e.target.value;
     this.setState({ filterType });
     this._getCities(this.state.selectedUf);
+    localStorage.setItem('filterType', filterType);
   }
 
   handleSelectUF = (e) => {
     const selectedUf = e.target.value;
     this.setState({ selectedUf });
     this._getCities(selectedUf);
+    localStorage.setItem('selectedUf', selectedUf);
     // this._api.getCities(selectedUf).then(cities => {
     //   const orderedCities = this._reorderCities(cities, selectedUf);
     //   this.setState({ cities: orderedCities });      
@@ -156,6 +163,7 @@ class FilterContainer extends React.Component {
     const { filterType } = this.state;
     const selectedCity = e.target.value;
     this.setState({ selectedCity });
+    localStorage.setItem('selectedCity', selectedCity);
     switch (filterType) {
       case 'hospital':
         this._api.getHospitals(selectedUf, selectedCity).then(hospitals => {
@@ -186,6 +194,7 @@ class FilterContainer extends React.Component {
   handleSelectHospital = (e) => {
     const selectedHospital = e.target.value;
     this.setState({ selectedHospital })
+    localStorage.setItem('selectedHospital', selectedHospital);
   }
 
   handleResults = () => {
