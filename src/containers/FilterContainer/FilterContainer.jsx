@@ -16,17 +16,19 @@ const styles = theme => ({
     flexWrap: 'wrap',
     width: '100%'
   },
-  formControl: {    
+  formControl: {
     minWidth: 120,
     width: '75%',
     margin: 'auto',
-    marginTop: '7.5%'
+    marginTop: '2vh'
   },
   selectEmpty: {
     marginTop: theme.spacing.unit * 2,
   },
+  selectFilter: {
+
+  },
   selectUf: {
-    fontSize: '1.2rem',
     display: 'flex',
     width: '100%'
   },
@@ -34,8 +36,8 @@ const styles = theme => ({
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
-    marginTop: '10%',
-    marginBottom: '2.5%'
+    marginTop: '7.5%',
+    marginBottom: '2%'
   },
   hidden: {
     display: 'none'
@@ -48,22 +50,22 @@ const styles = theme => ({
     width: '100%'
   },
   error: {
-    display: 'flex',   
+    display: 'flex',
     margin: 'auto',
-    width: '70%',    
+    width: '70%',
     flexWrap: 'wrap'
   },
-  errorTitle: {    
+  errorTitle: {
     textAlign: 'center',
-    width: '100%',    
-  }, 
+    width: '100%',
+  },
   reloadButton: {
     textAlign: 'center',
     border: '1px solid red',
     margin: 'auto',
     display: 'flex',
-    marginTop: '2%',     
-    marginBottom: '2%'    
+    marginTop: '2%',
+    marginBottom: '2%'
   }
 });
 
@@ -74,11 +76,14 @@ class FilterContainer extends React.Component {
 
   state = {
     ufs: [],
-    selectedUf: "",
     cities: [],
-    selectedCity: "",
     specialities: [],
+    hospitals: [],
+    selectedUf: "",
+    selectedCity: "",
     selectedSpeciality: "",
+    selectedHospital: "",
+    filterType: 'speciality',
     enabled: true,
     error: false,
     loading: true,
@@ -86,6 +91,7 @@ class FilterContainer extends React.Component {
   }
 
   componentDidMount() {
+
     this._api.getUF().then(ufs => {
       const idx = ufs.map(u => u.sigla).indexOf('SP')
       ufs.splice(idx, 1);
@@ -105,8 +111,9 @@ class FilterContainer extends React.Component {
       const orderedCities = this._reorderCities(cities, uf);
       this.setState({ cities: orderedCities });
       const selectedCity = cities[0];
-      this.setState({ selectedCity })
-      this._getSpecialities(uf, selectedCity)
+      this.setState({ selectedCity });
+      this._getSpecialities(uf, selectedCity);
+      this._getHospitals(uf, selectedCity);
     });
   }
 
@@ -119,40 +126,87 @@ class FilterContainer extends React.Component {
     });
   }
 
+  _getHospitals(selectedUf, selectedCity) {
+    this._api.getHospitals(selectedUf, selectedCity).then(hospitals => {
+      hospitals = hospitals.sort((a, b) => a.localeCompare(b));
+      this.setState({ hospitals });
+      this.setState({ selectedHospital: hospitals[0] })
+      this.setState({ loading: false })
+    });
+  }
+
+  handleFilterType = (e) => {
+    const filterType = e.target.value;
+    this.setState({ filterType });
+    this._getCities(this.state.selectedUf);
+  }
+
   handleSelectUF = (e) => {
     const selectedUf = e.target.value;
     this.setState({ selectedUf });
-    this._api.getCities(selectedUf).then(cities => {
-      const orderedCities = this._reorderCities(cities, selectedUf);
-      this.setState({ cities: orderedCities });
-      // this.setState({selectedCity: cities[0]})
-    });
+    this._getCities(selectedUf);
+    // this._api.getCities(selectedUf).then(cities => {
+    //   const orderedCities = this._reorderCities(cities, selectedUf);
+    //   this.setState({ cities: orderedCities });      
+    // });
   }
 
   handleSelectCity = (e) => {
     const selectedUf = this.state.selectedUf;
+    const { filterType } = this.state;
     const selectedCity = e.target.value;
     this.setState({ selectedCity });
-    this._api.getSpecialities(selectedUf, selectedCity).then(specialities => {
-      specialities = specialities.sort((a, b) => a.localeCompare(b));
-      this.setState({ specialities });
-      this.setState({ selectedSpeciality: specialities[0] })
-    });
+    switch (filterType) {
+      case 'hospital':
+        this._api.getHospitals(selectedUf, selectedCity).then(hospitals => {
+          hospitals = hospitals.sort((a, b) => a.localeCompare(b));
+          this.setState({ hospitals });
+          this.setState({ selectedHospital: hospitals[0] })
+        });
+        break;
+      case 'speciality':
+        this._api.getSpecialities(selectedUf, selectedCity).then(specialities => {
+          specialities = specialities.sort((a, b) => a.localeCompare(b));
+          this.setState({ specialities });
+          this.setState({ selectedSpeciality: specialities[0] })
+        });
+        break;
+      default:
+        return null;
+    }
+
   }
 
   handleSelectSpeciality = (e) => {
     this.setState({ enabled: true });
     const selectedSpeciality = e.target.value;
-    this.setState({ selectedSpeciality })    
+    this.setState({ selectedSpeciality })
+  }
+
+  handleSelectHospital = (e) => {
+    const selectedHospital = e.target.value;
+    this.setState({ selectedHospital })
   }
 
   handleResults = () => {
-    const { selectedUf, selectedCity, selectedSpeciality } = this.state;
-    this.setState({loading: true})
-    this.props.handleResults('results');
-    this._api.getByParameters(selectedUf, selectedCity, selectedSpeciality).then(r => {
-      this.props.handleResults(r, selectedSpeciality);
-    })
+    const {
+      filterType, selectedUf, selectedCity, selectedSpeciality, selectedHospital
+    } = this.state;
+
+    this.setState({ loading: true });
+
+    this.props.handleResults('results');    
+
+    if (filterType === 'speciality') {
+      this._api.getByParameters(selectedUf, selectedCity, selectedSpeciality).then(r => {
+        this.props.handleResults(r, selectedSpeciality);
+      })
+    } else if (filterType === 'hospital') {
+      this._api.getByHospital(selectedUf, selectedCity, selectedHospital).then(r => {
+        this.props.handleResults(r, selectedHospital);
+      })
+    }
+
   }
 
   _reorderCities(cities, selectedUf) {
@@ -176,10 +230,61 @@ class FilterContainer extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { ufs, cities, specialities, loading, error } = this.state;
+    const { ufs, cities, specialities, hospitals, loading, error } = this.state;
+
+    const filterForm = (
+
+      (() => {
+        switch (this.state.filterType) {
+          case 'hospital':
+            return (<FormControl className={classes.formControl}>
+              <NativeSelect
+                value={this.state.selectedHospital}
+                name="hospital"
+                onChange={this.handleSelectHospital}
+              >
+                {
+                  hospitals.map((h, i) => (<option key={i} value={h}>{h}</option>))
+                }
+              </NativeSelect>
+              <FormHelperText>Selecione um Hospital</FormHelperText>
+            </FormControl>);
+          case 'speciality':
+            return (<FormControl className={classes.formControl}>
+              <NativeSelect
+                value={this.state.selectedSpeciality}
+                name="speciality"
+                onChange={this.handleSelectSpeciality}
+              >
+                {/* <option selected>SELECIONE</option> */}
+                {
+                  specialities.map((s, i) => (<option key={i} value={s}>{s}</option>))
+                }
+              </NativeSelect>
+              <FormHelperText>Selecione uma Especialidade</FormHelperText>
+            </FormControl>);
+          default:
+            return null;
+        }
+      })())
+
 
     const content = (
       <React.Fragment>
+
+        <FormControl className={classes.formControl}>
+          <NativeSelect
+            value={this.state.filterType}
+            name="filterType"
+            onChange={this.handleFilterType}
+            className={classes.selectFilter}
+          >
+            <option value="speciality">ESPECIALIDADE</option>
+            <option value="hospital">CLINICA / HOSPITAL</option>
+          </NativeSelect>
+          <FormHelperText>Tipo de pesquisa</FormHelperText>
+        </FormControl>
+
         <FormControl className={classes.formControl}>
           <NativeSelect
             value={this.state.selectedUf}
@@ -209,31 +314,17 @@ class FilterContainer extends React.Component {
           <FormHelperText>Selecione uma cidade</FormHelperText>
         </FormControl>
 
-        <FormControl className={classes.formControl}>
-          <NativeSelect
-            value={this.state.selectedSpeciality}
-            name="speciality"
-            onChange={this.handleSelectSpeciality}
-          >
-            {/* <option selected>SELECIONE</option> */}
-            {
-              specialities.map((s, i) => (<option key={i} value={s}>{s}</option>))
-            }
-
-          </NativeSelect>
-          <FormHelperText>Selecione uma Especialidade</FormHelperText>
-        </FormControl>
+        {filterForm}
 
         <div className={classes.searchButton}>
           {this.state.enabled && <Button size="medium" variant="contained" color="primary" onClick={this.handleResults}>BUSCAR</Button>}
         </div>
+
       </React.Fragment>
     )
 
     return (
       <div className={classes.root}>
-
-
 
         {
           loading ?
@@ -255,9 +346,6 @@ class FilterContainer extends React.Component {
             </div>
           </div>
         }
-
-
-
 
       </div>
     )

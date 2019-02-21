@@ -9,7 +9,7 @@ const styles = {
     flexGrow: 1,    
     display: 'flex',
     borderTop: '0.3rem solid white',
-    marginTop: '12.5vh',
+    marginTop: '10vh',
     bottom: 0,
     width: '100%',
     

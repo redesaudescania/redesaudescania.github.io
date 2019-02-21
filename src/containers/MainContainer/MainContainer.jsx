@@ -15,19 +15,20 @@ import './MainContainer.css';
 export default class MainContainer extends Component {
 
     state = {
+        page: 'filter',
         results: [],
-        page: 'filter', // quando realizar pesquisa, alterar para results
         resultTitle: ''
     }
 
     handleResults = (results, resultTitle) => {
-        this.setState({results});
-        this.setState({resultTitle});
+        this.setState({ results });
+        this.setState({ resultTitle });
         this.setState({ page: 'results' });
     }
 
     handleReturn = () => {
         this.setState({ page: 'filter' });
+        this.setState({ resultTitle: '' });
         this.setState({ results: [] });
     }
 
@@ -49,7 +50,7 @@ export default class MainContainer extends Component {
             <div className="main-container">
 
                 <Paper className='paper'>
-                    {page}                    
+                    {page}
                 </Paper>
 
             </div>
