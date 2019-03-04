@@ -19,7 +19,7 @@ class FilterContainer extends React.Component {
 
   state = {
     selected: {
-      uf: localStorage.getItem('selectedUF') || 'SP',
+      uf: undefined,
       city: localStorage.getItem('selectedCity') || '',
       hospital: localStorage.getItem('selectedHospital') || '',
       type: null,
@@ -38,27 +38,28 @@ class FilterContainer extends React.Component {
 
   componentDidMount() {
 
-    const selectedUF = localStorage.getItem('selectedUF');
-
-    if (localStorage.getItem('selectedUF') === null) {
-      localStorage.setItem('selectedUF', 'SP');
-    }
-
-    const selected = Object.assign({}, this.state.selected);
-    selected.uf = selectedUF;
-    this.setState({ selected });
-
     this._api.getUF()
       .then(data => {
         const ufs = this._renderSP(data);
         this.setState({ ufs });
-
-        this._getCities(selectedUF);
+        this._getUF();
       })
       .catch(err => {
         console.error(err);
         this.setState({ error: true })
       });
+  }
+
+  _getUF() {
+    const selectedUF = localStorage.getItem('selectedUF');
+    if (selectedUF === null) {
+      localStorage.setItem('selectedUF', 'SP');
+      window.location.reload();
+    }
+    const selected = Object.assign({}, this.state.selected);
+    selected.uf = selectedUF;
+    this.setState({ selected })
+    this._getCities(selectedUF);
   }
 
   _getCities(uf) {
