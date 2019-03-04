@@ -4,231 +4,207 @@ import { withStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
+import Error from '../../components/Error';
 
 import Button from '@material-ui/core/Button';
 import NativeSelect from '@material-ui/core/NativeSelect';
 
 import RedeScaniaApi from '../../api/redescaniaApi';
 
-const styles = theme => ({
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    width: '100%'
-  },
-  formControl: {
-    minWidth: 120,
-    width: '75%',
-    margin: 'auto',
-    marginTop: '2vh'
-  },
-  selectEmpty: {
-    marginTop: theme.spacing.unit * 2,
-  },
-  selectFilter: {
-
-  },
-  selectUf: {
-    display: 'flex',
-    width: '100%'
-  },
-  searchButton: {
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-    marginTop: '7.5%',
-    marginBottom: '2%'
-  },
-  hidden: {
-    display: 'none'
-  },
-  progress: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '52.5vh',
-    width: '100%'
-  },
-  error: {
-    display: 'flex',
-    margin: 'auto',
-    width: '70%',
-    flexWrap: 'wrap'
-  },
-  errorTitle: {
-    textAlign: 'center',
-    width: '100%',
-  },
-  reloadButton: {
-    textAlign: 'center',
-    border: '1px solid red',
-    margin: 'auto',
-    display: 'flex',
-    marginTop: '2%',
-    marginBottom: '2%'
-  }
-});
-
+import styles from './styles';
 
 class FilterContainer extends React.Component {
 
   _api = new RedeScaniaApi();
 
   state = {
+    selected: {
+      uf: localStorage.getItem('selectedUF') || 'SP',
+      city: localStorage.getItem('selectedCity') || '',
+      hospital: localStorage.getItem('selectedHospital') || '',
+      type: null,
+      speciality: localStorage.getItem('selectedSpeciality') || ''
+    },
+    filterType: localStorage.getItem('filterType') || 'speciality',
     ufs: [],
     cities: [],
     specialities: [],
     hospitals: [],
-    selectedUf: localStorage.getItem('selectedUf'),
-    selectedCity: localStorage.getItem('selectedCity'),
-    selectedSpeciality: "",
-    selectedHospital: '',
-    filterType: localStorage.getItem('filterType') || 'speciality',
     enabled: true,
     error: false,
     loading: true,
     reloadTime: 0
   }
 
-  componentDidMount() {    
-    this._api.getUF().then(ufs => {
-      const idx = ufs.map(u => u.sigla).indexOf('SP')
-      ufs.splice(idx, 1);
-      ufs.unshift({ "sigla": "SP", "nome": "SÃO PAULO" })
-      this.setState({ ufs })
-      if (!this.state.selectedUf) {
-        const selectedUf = ufs[0].sigla;
-        this.setState({ selectedUf });
-        localStorage.setItem('selectedUf', selectedUf);
-      }
-      this._getCities(this.state.selectedUf);
-    })
-      .catch(() => {
+  componentDidMount() {
+
+    const selectedUF = localStorage.getItem('selectedUF');
+
+    if (localStorage.getItem('selectedUF') === null) {
+      localStorage.setItem('selectedUF', 'SP');
+    }
+
+    const selected = Object.assign({}, this.state.selected);
+    selected.uf = selectedUF;
+    this.setState({ selected });
+
+    this._api.getUF()
+      .then(data => {
+        const ufs = this._renderSP(data);
+        this.setState({ ufs });
+
+        this._getCities(selectedUF);
+      })
+      .catch(err => {
+        console.error(err);
         this.setState({ error: true })
       });
   }
 
   _getCities(uf) {
+    localStorage.removeItem('selectedCity');
     this._api.getCities(uf).then(cities => {
       const orderedCities = this._reorderCities(cities, uf);
       this.setState({ cities: orderedCities });
       const selectedCity = orderedCities[0];
-      this.setState({ selectedCity})
+      const selected = Object.assign({}, this.state.selected);
+      selected.city = selectedCity;
+      localStorage.setItem('selectedCity', selectedCity);
+      this.setState({ selected });
       this._getSpecialities(uf, selectedCity);
       this._getHospitals(uf, selectedCity);
     });
   }
 
-  _getSpecialities(selectedUf, selectedCity) {
-    this._api.getSpecialities(selectedUf, selectedCity).then(specialities => {
-      specialities = specialities.sort((a, b) => a.localeCompare(b));
-      this.setState({ specialities });
-      this.setState({ selectedSpeciality: specialities[0] })
+  _getSpecialities(selectedUF, selectedCity) {
+    localStorage.removeItem('selectedHospital');
+    localStorage.removeItem('selectedSpeciality');
+    this._api.getSpecialities(selectedUF, selectedCity).then(specialities => {
+      const orderedSpecialities = specialities.sort((a, b) => a.localeCompare(b));
+      this.setState({ specialities: orderedSpecialities });
+      const selectedSpeciality = orderedSpecialities[0];
+      const selected = Object.assign({}, this.state.selected);
+      selected.speciality = selectedSpeciality;
+      this.setState({ selected });
+      localStorage.setItem('selectedSpeciality', selectedSpeciality);
       this.setState({ loading: false })
     });
   }
 
   _getHospitals(selectedUf, selectedCity) {
-
+    localStorage.removeItem('selectedHospital');
+    localStorage.removeItem('selectedSpeciality');
     this._api.getHospitals(selectedUf, selectedCity).then(hospitals => {
-      hospitals = hospitals.sort((a, b) => a.localeCompare(b));
-      this.setState({ hospitals });
+      const sortedHospitals = hospitals.sort((a, b) => a.localeCompare(b));
+      this.setState({ hospitals: sortedHospitals });
       const selectedHospital = hospitals[0];
-      this.setState({ selectedHospital });
+      const selected = Object.assign({}, this.state.selected);
+      selected.hospital = selectedHospital;
+      this.setState({ selected });
       this.setState({ loading: false });
     });
   }
 
-  // _getLocationStorage() {
-  //   const filterType = localStorage.getItem('filterType');
-  //   const selectedUf
-  // }
-
   handleFilterType = (e) => {
     const filterType = e.target.value;
     this.setState({ filterType });
-    this._getCities(this.state.selectedUf);
+    this._getCities(this.state.selected.uf);
     localStorage.setItem('filterType', filterType);
   }
 
   handleSelectUF = (e) => {
-    const selectedUf = e.target.value;
-    this.setState({ selectedUf });
-    this._getCities(selectedUf);
-    localStorage.setItem('selectedUf', selectedUf);
-    localStorage.removeItem('selectedCity');
-    localStorage.removeItem('selectedHospital');
-
-    // this._api.getCities(selectedUf).then(cities => {
-    //   const orderedCities = this._reorderCities(cities, selectedUf);
-    //   this.setState({ cities: orderedCities });      
-    // });
+    const selectedUF = e.target.value;
+    const selected = Object.assign({}, this.state.selected);
+    selected.uf = selectedUF;
+    localStorage.setItem('selectedUF', selectedUF);
+    this.setState({ selected });
+    this._getCities(selectedUF);
   }
 
   handleSelectCity = (e) => {
-    const selectedUf = this.state.selectedUf;
+    const { uf } = this.state.selected;
     const { filterType } = this.state;
     const selectedCity = e.target.value;
-    this.setState({ selectedCity });
+    const selected = Object.assign({}, this.state.selected);
+    selected.city = selectedCity;
+
     localStorage.setItem('selectedCity', selectedCity);
+
     switch (filterType) {
+
       case 'hospital':
-        this._api.getHospitals(selectedUf, selectedCity).then(hospitals => {
-          hospitals = hospitals.sort((a, b) => a.localeCompare(b));
-          this.setState({ hospitals });
-          this.setState({ selectedHospital: hospitals[0] })
+        this._api.getHospitals(uf, selectedCity).then(hospitals => {
+          const sortedHospitals = hospitals.sort((a, b) => a.localeCompare(b));
+          this.setState({ hospitals: sortedHospitals });
+          selected.hospital = sortedHospitals[0];
         });
         break;
+
       case 'speciality':
-        this._api.getSpecialities(selectedUf, selectedCity).then(specialities => {
-          specialities = specialities.sort((a, b) => a.localeCompare(b));
-          this.setState({ specialities });
-          this.setState({ selectedSpeciality: specialities[0] })
+        this._api.getSpecialities(uf, selectedCity).then(specialities => {
+          const sortedSpecialities = specialities.sort((a, b) => a.localeCompare(b));
+          this.setState({ specialities: sortedSpecialities });
+          selected.speciality = sortedSpecialities[0];
         });
         break;
+
       default:
         return null;
     }
+
+    this.setState({ selected });
 
   }
 
   handleSelectSpeciality = (e) => {
     this.setState({ enabled: true });
     const selectedSpeciality = e.target.value;
-    this.setState({ selectedSpeciality })
+    const selected = Object.assign({}, this.state.selected);
+    selected.speciality = selectedSpeciality;
+    localStorage.setItem('selectedSpeciality', selectedSpeciality);
+    this.setState({ selected });
   }
 
   handleSelectHospital = (e) => {
     const selectedHospital = e.target.value;
-    this.setState({ selectedHospital })
+    const selected = Object.assign({}, this.state.selected);
+    selected.hospital = selectedHospital;
     localStorage.setItem('selectedHospital', selectedHospital);
+    this.setState({ selected });
   }
 
   handleResults = () => {
-    const {
-      filterType, selectedUf, selectedCity, selectedSpeciality, selectedHospital
-    } = this.state;
+
+    const { filterType, selected } = this.state;
 
     this.setState({ loading: true });
 
     this.props.handleResults('results');
 
     if (filterType === 'speciality') {
-      this._api.getByParameters(selectedUf, selectedCity, selectedSpeciality).then(r => {
-        this.props.handleResults(r, selectedSpeciality);
+      this._api.getByParameters(selected.uf, selected.city, selected.speciality).then(r => {
+        this.props.handleResults(r, selected.speciality);
       })
     } else if (filterType === 'hospital') {
-      this._api.getByHospital(selectedUf, selectedCity, selectedHospital).then(r => {
-        this.props.handleResults(r, selectedHospital);
+      this._api.getByHospital(selected.uf, selected.city, selected.hospital).then(r => {
+        this.props.handleResults(r, selected.hospital);
       })
     }
 
   }
 
-  _reorderCities(cities, selectedUf) {
-    cities = cities.sort((a, b) => a.localeCompare(b))
-    if (selectedUf !== 'SP') {
-      return cities;
+  _renderSP(ufs) {
+    const modifiedUfs = [...ufs];
+    const idx = modifiedUfs.map(u => u.sigla).indexOf('SP');
+    modifiedUfs.splice(idx, 1);
+    modifiedUfs.unshift({ "sigla": "SP", "nome": "SÃO PAULO" });
+    return modifiedUfs;
+  }
+
+  _reorderCities(cities, selectedUF) {
+    const sortedCities = cities.sort((a, b) => a.localeCompare(b))
+    if (selectedUF !== 'SP') {
+      return sortedCities;
     }
     const citiesArray = [
       'SAO PAULO', 'SANTOS', 'RIBEIRAO PIRES', 'MAUA',
@@ -236,17 +212,17 @@ class FilterContainer extends React.Component {
     ];
 
     citiesArray.map((ca, i) => {
-      let idx = cities.map(c => c).indexOf(ca);
-      cities.splice(idx, 1);
-      cities.unshift(ca);
+      const idx = sortedCities.map(c => c).indexOf(ca);
+      sortedCities.splice(idx, 1);
+      sortedCities.unshift(ca);
       return ca;
     });
-    return cities;
+    return sortedCities;
   }
 
   render() {
     const { classes } = this.props;
-    const { ufs, cities, specialities, hospitals, loading, error } = this.state;
+    const { selected, ufs, cities, specialities, hospitals, loading, error, filterType } = this.state;
 
     const filterForm = (
 
@@ -255,7 +231,7 @@ class FilterContainer extends React.Component {
           case 'hospital':
             return (<FormControl className={classes.formControl}>
               <NativeSelect
-                value={this.state.selectedHospital}
+                value={selected.hospital}
                 name="hospital"
                 onChange={this.handleSelectHospital}
               >
@@ -268,11 +244,10 @@ class FilterContainer extends React.Component {
           case 'speciality':
             return (<FormControl className={classes.formControl}>
               <NativeSelect
-                value={this.state.selectedSpeciality}
+                value={selected.speciality}
                 name="speciality"
                 onChange={this.handleSelectSpeciality}
-              >
-                {/* <option selected>SELECIONE</option> */}
+              >                
                 {
                   specialities.map((s, i) => (<option key={i} value={s}>{s}</option>))
                 }
@@ -290,7 +265,7 @@ class FilterContainer extends React.Component {
 
         <FormControl className={classes.formControl}>
           <NativeSelect
-            value={this.state.filterType}
+            value={filterType}
             name="filterType"
             onChange={this.handleFilterType}
             className={classes.selectFilter}
@@ -303,7 +278,7 @@ class FilterContainer extends React.Component {
 
         <FormControl className={classes.formControl}>
           <NativeSelect
-            value={this.state.selectedUf}
+            value={selected.uf}
             name="uf"
             onChange={this.handleSelectUF}
             className={classes.selectUf}
@@ -313,21 +288,22 @@ class FilterContainer extends React.Component {
             }
 
           </NativeSelect>
-          <FormHelperText>Selecione um estado</FormHelperText>
+          <FormHelperText>Selecione um Estado {selected.uf}</FormHelperText>
         </FormControl>
 
         <FormControl className={classes.formControl}>
           <NativeSelect
-            value={this.state.selectedCity}
+            value={selected.city}
             name="city"
             onChange={this.handleSelectCity}
           >
+
             {
               cities.map((c, i) => (<option key={i} value={c}>{c}</option>))
             }
 
           </NativeSelect>
-          <FormHelperText>Selecione uma cidade</FormHelperText>
+          <FormHelperText>Selecione uma Cidade</FormHelperText>
         </FormControl>
 
         {filterForm}
@@ -352,15 +328,7 @@ class FilterContainer extends React.Component {
             content
         }
         {
-          error &&
-          <div className={classes.error}>
-            <div className={classes.errorTitle}>
-              ERRO: VERIFIQUE SUA CONEXÃO COM A INTERNET E TENTE NOVAMENTE
-            </div>
-            <div onClick={() => window.location.reload()} className={classes.reloadButton}>
-              <Button variant="contained" color="secondary">RECARREGAR</Button>
-            </div>
-          </div>
+          error && <Error classes={classes} />
         }
 
       </div>
