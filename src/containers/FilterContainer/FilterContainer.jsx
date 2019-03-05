@@ -182,15 +182,11 @@ class FilterContainer extends React.Component {
 
     this.props.handleResults('results');
 
-    if (filterType === 'speciality') {
-      this._api.getByParameters(selected.uf, selected.city, selected.speciality).then(r => {
-        this.props.handleResults(r, selected.speciality);
-      })
-    } else if (filterType === 'hospital') {
-      this._api.getByHospital(selected.uf, selected.city, selected.hospital).then(r => {
-        this.props.handleResults(r, selected.hospital);
-      })
-    }
+    this._api.getByPar(filterType, selected).then(r => {
+      return this.props.handleResults(r, selected[filterType]);
+    });
+
+    return;
 
   }
 
@@ -225,43 +221,57 @@ class FilterContainer extends React.Component {
     const { classes } = this.props;
     const { selected, ufs, cities, specialities, hospitals, loading, error, filterType } = this.state;
 
-    const filterForm = (
+    const FilterHospital = () => {
+      return (
+        <FormControl className={classes.formControl}>
+          <NativeSelect
+            value={selected.hospital}
+            name="hospital"
+            onChange={this.handleSelectHospital}
+          >
+            {
+              hospitals.map((h, i) => (<option key={i} value={h}>{h}</option>))
+            }
+          </NativeSelect>
+          <FormHelperText>Selecione um Hospital</FormHelperText>
+        </FormControl>
+      )
+    };
+    const FilterSpeciality = () => {
+      return (
+        <FormControl className={classes.formControl}>
+          <NativeSelect
+            value={selected.speciality}
+            name="speciality"
+            onChange={this.handleSelectSpeciality}
+          >
+            {
+              specialities.map((s, i) => (<option key={i} value={s}>{s}</option>))
+            }
+          </NativeSelect>
+          <FormHelperText>Selecione uma Especialidade</FormHelperText>
+        </FormControl>
+      )
+    }
 
-      (() => {
-        switch (this.state.filterType) {
-          case 'hospital':
-            return (<FormControl className={classes.formControl}>
-              <NativeSelect
-                value={selected.hospital}
-                name="hospital"
-                onChange={this.handleSelectHospital}
-              >
-                {
-                  hospitals.map((h, i) => (<option key={i} value={h}>{h}</option>))
-                }
-              </NativeSelect>
-              <FormHelperText>Selecione um Hospital</FormHelperText>
-            </FormControl>);
-          case 'speciality':
-            return (<FormControl className={classes.formControl}>
-              <NativeSelect
-                value={selected.speciality}
-                name="speciality"
-                onChange={this.handleSelectSpeciality}
-              >                
-                {
-                  specialities.map((s, i) => (<option key={i} value={s}>{s}</option>))
-                }
-              </NativeSelect>
-              <FormHelperText>Selecione uma Especialidade</FormHelperText>
-            </FormControl>);
-          default:
-            return null;
-        }
-      })())
+    const FilterForm = (props) => {
 
+      let filter;
 
-    const content = (
+      switch (props.filterType) {
+        case 'hospital':
+          filter = <FilterHospital />;
+          break;
+        case 'speciality':
+          filter = <FilterSpeciality />;
+          break;
+        default:
+          return null;
+      }
+      return filter;
+    };
+
+    const Content = (props) => (
       <React.Fragment>
 
         <FormControl className={classes.formControl}>
@@ -289,7 +299,7 @@ class FilterContainer extends React.Component {
             }
 
           </NativeSelect>
-          <FormHelperText>Selecione um Estado {selected.uf}</FormHelperText>
+          <FormHelperText>Selecione um Estado</FormHelperText>
         </FormControl>
 
         <FormControl className={classes.formControl}>
@@ -307,32 +317,34 @@ class FilterContainer extends React.Component {
           <FormHelperText>Selecione uma Cidade</FormHelperText>
         </FormControl>
 
-        {filterForm}
+        <FilterForm filterType={filterType} />
 
         <div className={classes.searchButton}>
           {this.state.enabled && <Button size="medium" variant="contained" color="primary" onClick={this.handleResults}>BUSCAR</Button>}
         </div>
 
       </React.Fragment>
-    )
+    );
+
+    const Progress = (props) => {
+      return (
+        <div className={classes.progress}>
+          <CircularProgress thickness={props.size} size={50} />
+        </div>
+      );
+    }
 
     return (
-      <div className={classes.root}>
 
+      <div className={classes.root} >
         {
-          loading ?
-            (
-              <div className={classes.progress}>
-                <CircularProgress thickness={5} size={100} />
-              </div>
-            ) :
-            content
+          !loading ? <Content /> : <Progress />
         }
         {
           error && <Error classes={classes} />
         }
 
-      </div>
+      </div >
     )
   }
 }

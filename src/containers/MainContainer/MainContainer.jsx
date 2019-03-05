@@ -29,7 +29,13 @@ export default class MainContainer extends Component {
     handleReturn = () => {
         this.setState({ page: 'filter' });
         this.setState({ resultTitle: '' });
-        this.setState({ results: [] });
+        const results = [...this.state.results];
+        results.length = 0;
+        this.setState({ results });
+    }
+
+    componentDidMount() {
+        
     }
 
     render() {

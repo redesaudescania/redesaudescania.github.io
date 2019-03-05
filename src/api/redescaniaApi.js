@@ -9,8 +9,8 @@ class RedeScaniaApi {
     async getUF() {
         let url = "https://api.mlab.com/api/1/databases/redescania/collections/uf?"
         url += `apiKey=${this._}&s={"sigla":1}`;
-         const ufs = await axios.get(url);         
-         return ufs.data;
+        const ufs = await axios.get(url);
+        return ufs.data;
     }
 
     async  getCities(uf) {
@@ -45,17 +45,39 @@ class RedeScaniaApi {
         return await axios.get(url).then(res => res.data);
     }
 
-    async getByHospital(...params) {
+    // async getByHospital(...params) {
+
+    //     let url = "https://api.mlab.com/api/1/databases/redescania/collections/rede?"
+    //     url += "apiKey=" + this._;
+    //     url += `&q={ "UF": "${params[0]}" ,`
+    //     url += `"CIDADE": "${params[1]}" ,`
+    //     url += ` "NOME-REF": "${params[2]}" }`
+    //     url += `&s={"ESPECIALIDADE": 1} `;
+    //     return await axios.get(url).then(res => res.data);
+    // }
+
+    async getByPar(type, params) {
+
+        if (type === 'hospital') {
+            params.speciality = '{$exists: true}'
+            params.hospital = '"' + params.hospital +'"';
+        } else if (type === 'speciality') {
+            params.hospital = '{$exists: true}';
+            params.speciality = '"' + params.speciality +'"';
+        } else {
+            ;
+        }       
 
         let url = "https://api.mlab.com/api/1/databases/redescania/collections/rede?"
         url += "apiKey=" + this._;
-        url += `&q={ "UF": "${params[0]}" ,`
-        url += `"CIDADE": "${params[1]}" ,`
-        url += ` "NOME-REF": "${params[2]}" }`
-        url += `&s={"ESPECIALIDADE": 1} `;
+        url += `&q={`
+        url += `"UF": "${params.uf}" ,`
+        url += ` "CIDADE": "${params.city}" ,`
+        url += ` "NOME-REF": ${params.hospital} ,`
+        url += ` "ESPECIALIDADE": ${params.speciality} } `;
+        
         return await axios.get(url).then(res => res.data);
-    }
-
+    }   
 
     _ = process.env.REACT_APP_APIKEY;
     _api = process.env.REACT_APP_API_COMMAND;
